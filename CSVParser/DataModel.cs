@@ -20,7 +20,7 @@ namespace CSVParser
         [Optional]
         public string license { get; set; }
 
-        [Optional]
+        [Ignore]
         public string? errors { get; set; }
     }
 

@@ -10,7 +10,7 @@ using System.Text;
 namespace CSVParser
 {
     [TestClass]
-    public class ParserClassTests
+    public class ParserAppTests
     {
         static private ICsvHandler _csvHandler;
         static private Mock<IFactory> _csvHelper;
@@ -45,7 +45,7 @@ namespace CSVParser
         static string mockFilePath = "testing.csv";
 
         [ClassInitialize]
-        public static void ParserClassRequiredObjects(TestContext context)
+        public static void ParserAppRequiredObjects(TestContext context)
         {
             string mockFileContents = "organisation_id,suborg_id,organisation_name,organisation_number,parent_or_child,license,errors\n" +
                                         "1,,OrgA,123456,Parent,\n" +
@@ -55,8 +55,36 @@ namespace CSVParser
 
             listDataModel = new List<DataModel>
             {
-                new DataModel { organisation_id = 1, suborg_id = "", organisation_name = "OrgA", organisation_number = "123456", parent_or_child = "Parent", license = "", errors = "suborg_id is nulllicense is null" },
-                new DataModel { organisation_id = 2, suborg_id = "Sub1", organisation_name = "OrgB", organisation_number = "654321", parent_or_child = "Child", license = "License123", errors = "" }
+                new DataModel { 
+                    organisation_id = 1, 
+                    suborg_id = "", 
+                    organisation_name = "OrgA", 
+                    organisation_number = "123456", 
+                    parent_or_child = "Parent", 
+                    license = "", 
+                    errorsStr = "suborg_id is nulllicense is null", 
+                    errorsObj = new UploadFileErrorModel()
+                        {
+                            file_line_no = 2,
+                            line_content = "1,,OrgA,123456,Parent,\n",
+                            line_error_message = "suborg_id is nulllicense is null" 
+                        }
+                },
+                new DataModel {
+                    organisation_id = 2,
+                    suborg_id = "Sub1",
+                    organisation_name = "OrgB",
+                    organisation_number = "654321",
+                    parent_or_child = "Child",
+                    license = "License123",
+                    errorsStr = "",
+                    errorsObj = new UploadFileErrorModel()
+                        {
+                            file_line_no = 3,
+                            line_content = "2,Sub1,OrgB,654321,Child,License123",
+                            line_error_message = ""
+                        }
+                }
             };
 
             _loggerMock = new Mock<Microsoft.Extensions.Logging.ILogger<CsvHandler>>();
@@ -77,13 +105,13 @@ namespace CSVParser
             _csvHelper = new Mock<IFactory>(MockBehavior.Loose);
             _csvWriter = new Mock<IWriter>(MockBehavior.Loose);
             _csvReader = new Mock<IReader>(MockBehavior.Loose);
-            _csvHandler = new CsvHandler(_loggerMock.Object);
+            _csvHandler = new CsvHandler();
 
 
         }
 
         [ClassCleanup]
-        public static void ParserClassCleanStaticObjects()
+        public static void ParserAppCleanStaticObjects()
         {
             //File.Delete(mockFilePath);
         }
@@ -115,10 +143,23 @@ namespace CSVParser
         public void ParseClass_ReturnCorrectFileContents()
         {
             //act
-            var actual = _csvHandler.GetListOfRecords<DataModel, DataModelMap>(fileContent).ToList();
+            var actual = _csvHandler.GetListOfRecordsFromContents<DataModel, DataModelMap>(fileContent).ToList();
 
             //assert
             actual.Should().BeEquivalentTo(expected);
+        }
+
+
+        [TestMethod]
+        public void Parse_EmptyCsvFile_ThrowsInvalidDataException()
+        {
+            // Arrange
+            var emtptyContents = "";
+
+
+            // Act & Assert
+            Assert.ThrowsException<InvalidDataException>(() => _csvHandler.GetListOfRecordsFromContents<DataModel, DataModelMap>(emtptyContents).ToList());
+
         }
     }
 }

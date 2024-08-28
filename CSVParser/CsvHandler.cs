@@ -1,22 +1,17 @@
-﻿using CsvHelper;
+﻿using Castle.Core.Logging;
+using CsvHelper;
 using CsvHelper.Configuration;
-using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.DependencyInjection;
+//using Microsoft.Extensions.Logging;
 using System.Globalization;
 
 namespace CSVParser
 {
-    public class CsvHandler : ICsvHandler
+    internal sealed class CsvHandler : ICsvHandler
     {
         #region *** Setup ***
 
-        private ILogger logger;
-
-        public CsvHandler(ILogger<CsvHandler> _logger)
-        {
-            this.logger = _logger;
-        }
-
-        public IEnumerable<T> GetListOfRecords<T, M>(string fileContent) where M : ClassMap
+        public IEnumerable<T> GetListOfRecordsFromContents<T, M>(string fileContent) where M : ClassMap
         {
             var _csvHelper = new Factory();
 
@@ -27,6 +22,12 @@ namespace CSVParser
             config.TrimOptions = TrimOptions.Trim;
             config.HeaderValidated = null;
             config.BadDataFound = null;
+
+            var tmpReader = new StringReader(fileContent);
+            if (tmpReader.Peek() == -1)
+            {
+                throw new InvalidDataException("File does not have any data!");
+            }
 
             using (var stringReader = new StringReader(fileContent))
             {
@@ -39,6 +40,35 @@ namespace CSVParser
             }
         }
 
+
+        public IList<T> GetListOfRecordsFromPath<T, M>(string filePath, CsvConfiguration csvConfiguration) where M : ClassMap
+        {
+            IEnumerable<T> rows = new List<T>();
+            var returnedRows = new List<T>();
+
+            if (!File.Exists(filePath))
+            {
+                throw new FileNotFoundException("Required file not found!");
+            }
+
+            var tmpReader = new StreamReader(filePath);
+            if (tmpReader.Peek() == -1)
+            {
+                throw new Exception("File does not have any data!");
+            }
+
+            using (var reader = new StreamReader(filePath))
+            using (var csv = new CsvReader(reader, csvConfiguration))
+            {
+                csv.Context.RegisterClassMap<M>();
+
+                rows = csv.GetRecords<T>();
+
+                returnedRows = rows.ToList();
+            }
+            
+            return returnedRows;
+        }
         #endregion
 
     }

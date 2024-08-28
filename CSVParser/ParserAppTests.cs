@@ -118,7 +118,7 @@ namespace CSVParser
 
 
         [TestInitialize]
-        public void ParserClassMockObjectsSetup()
+        public void ParserAppMockObjectsSetup()
         {
             _csvReader.Setup(s => s.Configuration).Returns(configuration);
             _csvHelper.Setup(s => s.CreateReader(It.IsAny<StringReader>(), CultureInfo.CurrentCulture)).Returns(_csvReader.Object);
@@ -140,7 +140,7 @@ namespace CSVParser
         }
 
         [TestMethod]
-        public void ParseClass_ReturnCorrectFileContents()
+        public void ParseApp_ReturnCorrectFileContents()
         {
             //act
             var actual = _csvHandler.GetListOfRecordsFromContents<DataModel, DataModelMap>(fileContent).ToList();
@@ -151,15 +151,32 @@ namespace CSVParser
 
 
         [TestMethod]
-        public void Parse_EmptyCsvFile_ThrowsInvalidDataException()
+        public void ParseApp_EmptyCsvFile_ThrowsInvalidDataException()
         {
             // Arrange
-            var emtptyContents = "";
+            var filePath = "empty.csv";
+            File.WriteAllText(filePath, "");
 
 
             // Act & Assert
-            Assert.ThrowsException<InvalidDataException>(() => _csvHandler.GetListOfRecordsFromContents<DataModel, DataModelMap>(emtptyContents).ToList());
+            Assert.ThrowsException<InvalidDataException>(() => _csvHandler.GetListOfRecordsFromPath<DataModel, DataModelMap>(filePath, configuration).ToList());
 
+            // Cleanup
+            File.Delete(filePath);
+        }
+
+
+        [TestMethod]
+        public void ParseApp_FileNotFound_ThrowsInvalidDataException()
+        {
+            // Arrange
+            var filePath = "nofile.csv";
+
+            // Act & Assert
+            Assert.ThrowsException<FileNotFoundException>(() => _csvHandler.GetListOfRecordsFromPath<DataModel, DataModelMap>(filePath, configuration).ToList());
+
+            // Cleanup
+            File.Delete(filePath);
         }
     }
 }

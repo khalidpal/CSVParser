@@ -54,7 +54,8 @@ namespace CSVParser
             var tmpReader = new StreamReader(filePath);
             if (tmpReader.Peek() == -1)
             {
-                throw new Exception("File does not have any data!");
+                tmpReader.Dispose();
+                throw new InvalidDataException("File does not have any data!");
             }
 
             using (var reader = new StreamReader(filePath))

@@ -1,13 +1,13 @@
-﻿using CsvHelper;
+using CsvHelper;
 using CsvHelper.Configuration;
+using CSVParser;
 using FluentAssertions;
-using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Moq;
 using System.Globalization;
 using System.IO.Abstractions.TestingHelpers;
 using System.Text;
 
-namespace CSVParser
+namespace ParserClassTests
 {
     [TestClass]
     public class ParserAppTests
@@ -41,7 +41,7 @@ namespace CSVParser
         static byte[] mockFileBytes;
         //static List<DataModel> listDataModel = null;
         static List<DataModel> listDataModel = null;
-        private static Mock<Microsoft.Extensions.Logging.ILogger<CsvHandler>> _loggerMock;
+        private static Mock<Microsoft.Extensions.Logging.ILogger<ICsvHandler>> _loggerMock;
         static string mockFilePath = "testing.csv";
 
         [ClassInitialize]
@@ -55,19 +55,19 @@ namespace CSVParser
 
             listDataModel = new List<DataModel>
             {
-                new DataModel { 
-                    organisation_id = 1, 
-                    suborg_id = "", 
-                    organisation_name = "OrgA", 
-                    organisation_number = "123456", 
-                    parent_or_child = "Parent", 
-                    license = "", 
-                    errorsStr = "suborg_id is nulllicense is null", 
+                new DataModel {
+                    organisation_id = 1,
+                    suborg_id = "",
+                    organisation_name = "OrgA",
+                    organisation_number = "123456",
+                    parent_or_child = "Parent",
+                    license = "",
+                    errorsStr = "suborg_id is nulllicense is null",
                     errorsObj = new UploadFileErrorModel()
                         {
                             file_line_no = 2,
                             line_content = "1,,OrgA,123456,Parent,\n",
-                            line_error_message = "suborg_id is nulllicense is null" 
+                            line_error_message = "suborg_id is nulllicense is null"
                         }
                 },
                 new DataModel {
@@ -87,7 +87,7 @@ namespace CSVParser
                 }
             };
 
-            _loggerMock = new Mock<Microsoft.Extensions.Logging.ILogger<CsvHandler>>();
+            _loggerMock = new Mock<Microsoft.Extensions.Logging.ILogger<ICsvHandler>>();
 
 
             //arrange

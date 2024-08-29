@@ -51,18 +51,23 @@ namespace CSVParser
                 {
                     if (methodResult.Count() > 0)
                     {
-                        Console.WriteLine("organisationId\tsubOrganisationId\torganisationName\torganisationNumber\tparentOrChild\tlicense\tErrors");
-                        foreach (var item in methodResult)
-                        {
-                            Console.WriteLine($"{item.organisation_id.ToString()}\t{item.suborg_id}\t{item.organisation_name}\t{item.organisation_number}\t{item.parent_or_child}\t{item.license}\t{item.errorsStr}");
-                        }
+                        //Console.WriteLine("organisationId\tsubOrganisationId\torganisationName\torganisationNumber\tparentOrChild\tlicense\tErrors");
+                        //foreach (var item in methodResult)
+                        //{
+                        //    Console.WriteLine($"{item.organisation_id.ToString()}\t{item.suborg_id}\t{item.organisation_name}\t{item.organisation_number}\t{item.parent_or_child}\t{item.license}\t{item.errorsStr}");
+                        //}
                         _logger.LogInformation($"{methodResult.Count()} records");
+                        _logger.LogInformation($"Creating errors csv!");
+                        var isDone = _csvHandler.CreateErrorsCSV(methodResult, config);
+                        if (isDone)
+                            _logger.LogInformation($"All Done!");
+                        else
+                            _logger.LogInformation($"Failed creating csv!");
                     }
                     else
                     {
                         _logger.LogInformation("No records");
                         Console.WriteLine("No records");
-                        _logger.LogInformation("No records");
                     }
                 }
                 else

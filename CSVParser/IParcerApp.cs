@@ -1,7 +1,4 @@
-﻿using CsvHelper.Configuration;
-using Microsoft.Extensions.Hosting;
-
-namespace CSVParser
+﻿namespace CSVParser
 {
     public interface IParserApp
     {
